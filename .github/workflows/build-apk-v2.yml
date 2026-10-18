@@ -1,0 +1,30 @@
+name: Build Hesn Private Browser v2
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+    paths: [ 'HesnPrivateBrowser-project-v2.zip', '.github/workflows/build-apk-v2.yml' ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Extract project
+        run: mkdir project && unzip -q HesnPrivateBrowser-project-v2.zip -d project
+      - name: Build debug APK
+        working-directory: project
+        run: gradle :app:assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HesnPrivateBrowser-v2-debug-apk
+          path: project/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
